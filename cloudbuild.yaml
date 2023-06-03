@@ -1,0 +1,24 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["build", "-t", "$_IMAGE_NAME:$COMMIT_SHA", "."]
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "$_IMAGE_NAME:$COMMIT_SHA"]
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      [
+        "run",
+        "deploy",
+        "redirect",
+        "--image",
+        "$_IMAGE_NAME:$COMMIT_SHA",
+        "--max-instances",
+        "1",
+        "--region",
+        "asia-northeast1",
+        "--allow-unauthenticated",
+      ]
+images:
+  - "$_IMAGE_NAME:$COMMIT_SHA"
+options:
+  logging: CLOUD_LOGGING_ONLY
